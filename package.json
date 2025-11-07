@@ -1,0 +1,50 @@
+{
+    "name": "eco-token",
+    "version": "0.0.1",
+    "description": "Community-driven meme coin designed to blend fun, virality, and financial utility",
+    "scripts": {
+        "build": "forge build",
+        "build-force": "forge build --force",
+        "check-size": "hardhat size-contracts",
+        "compile": "hardhat compile",
+        "compile-force": "hardhat compile --force",
+        "deploy-fork": "cross-env HARDHAT_FORK=true hardhat run scripts/deploy.js --network hardhat",
+        "deploy-local": "hardhat run scripts/deploy.js --network hardhat",
+        "deploy-production": "hardhat run scripts/deploy.js",
+        "deploy-staging": "hardhat run scripts/deploy.js --network staging",
+        "format": "prettier --check --write .prettierrc *.json *.js {contracts,tests}/**/*.sol {scripts}/**/*.js graphs/**/*.{json,ts}",
+        "format-lint": "npm run format && npm run lint",
+        "lint": "solhint --max-warnings 0 {contracts,tests}/**/*.sol",
+        "test": "cross-env FOUNDRY_PROFILE=forking forge test",
+        "test-force": "forge build --force && npm run test",
+        "test-local": "forge test",
+        "test-log": "npm run test -- -vv",
+        "test-quick": "npm run test -- --no-compile",
+        "test-report": "npm run test -- --gas-report",
+        "test-verbose": "npm run test -- -vvvvv"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Absarsdq291/eco-token"
+    },
+    "author": "Absar Salahuddin <absarsdq291@gmail.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "@nomicfoundation/hardhat-foundry": "^1.1.3",
+        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "cross-env": "^7.0.3",
+        "dotenv": "^16.4.5",
+        "hardhat": "^2.24.1",
+        "hardhat-contract-sizer": "^2.10.0",
+        "prettier": "^3.3.3",
+        "prettier-plugin-package": "^1.4.0",
+        "prettier-plugin-solidity": "^1.4.1",
+        "prettier-plugin-sort-imports": "^1.8.6",
+        "solhint": "^6.0.1"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "5.4.0",
+        "@uniswap/v3-core": "1.0.1",
+        "@uniswap/v3-periphery": "1.4.4"
+    }
+}

@@ -13,14 +13,19 @@ const deploy = async () => {
     const { txType } = await initialize({ feeDataLogType: feeDataLogType });
 
     // Definition variables.
-    const contractName = "...";
+    const contractName = "Eco";
 
     // Deployment variables.
-    let constructorArguments = "...";
-    let constructorValue = "...";
+    let constructorArguments = [process.env.INITIAL_OWNER,
+        process.env.LIQUIDITY_POOL_WALLET,
+        process.env.PRESALE_WALLET,
+        process.env.MARKETING_WALLET,
+        process.env.DEVELOPMENT_WALLET,
+        process.env.COMMUNITY_WALLET,
+        process.env.VESTED_WALLET];
+    let constructorValue = 0;
 
     // Structuring deployment variables.
-    constructorArguments = constructorArguments.split("|");
     constructorValue = hardhat.ethers.toBigInt(constructorValue || 0);
 
     // Getting gas limit.
@@ -46,7 +51,7 @@ const deploy = async () => {
     });
 
     // Updating env.
-    updateEnv("...", contractAddress);
+    updateEnv("ECO_ADDRESS", contractAddress);
 
     // Waiting for block explorer.
     await wait("60 seconds");

@@ -5,116 +5,178 @@ pragma solidity 0.8.30;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Eco is ERC20, Ownable {
-    // excluded from fees and max transaction amount
-    mapping(address => bool) private _isExcludedFromFees;
+import { IEco } from "./interfaces/IEco.sol";
 
-    // Pools/Pairs
-    mapping(address => bool) public automatedMarketMakerPairs;
+/**
+ * @title Eco.
+ * @author Absar Salahuddin.
+ * @notice Basic ERC20 token with trading taxes.
+ */
+contract Eco is ERC20, Ownable, IEco {
+    /* ========================== STATE VARIABLES ========================== */
 
-    // Wallet addresses
+    /// @inheritdoc IEco
+    uint256 public constant PPM = 1000000;
+
+    /// @inheritdoc IEco
+    uint256 public constant LIQUIDITY_TAX = 20_000;
+
+    /// @inheritdoc IEco
+    uint256 public constant MARKETING_TAX = 20_000;
+
+    /// @inheritdoc IEco
+    uint256 public constant DEVELOPMENT_TAX = 10_000;
+
+    /// @inheritdoc IEco
+    uint256 public constant BURN_TAX = 10_000;
+
+    /// @inheritdoc IEco
     address public marketingWallet;
+
+    /// @inheritdoc IEco
     address public developmentWallet;
+
+    /// @inheritdoc IEco
     address public liquidityPoolWallet;
 
-    // Tax rates (in basis points)
-    uint256 public constant LIQUIDITY_TAX = 20_000; // 2%
-    uint256 public constant MARKETING_TAX = 20_000; // 2%
-    uint256 public constant DEVELOPMENT_TAX = 10_000; // 1%
-    uint256 public constant BURN_TAX = 10_000; // 1%
-    uint256 public constant TOTAL_TAX = LIQUIDITY_TAX + MARKETING_TAX + DEVELOPMENT_TAX + BURN_TAX; // 60,000 = 6%
+    /// @inheritdoc IEco
+    mapping(address => bool) public automatedMarketMakerPairs;
 
+    /// @inheritdoc IEco
+    mapping(address => bool) public isExcludedFromFees;
+
+    /* ========================== CONSTRUCTOR ========================== */
+
+    /**
+     * @dev Initializes variables and ownership.
+     * @param initialOwner_ The initial owner of the contract.
+     * @param liquidityPoolWallet_ The liquidity pool wallet address.
+     * @param presaleWallet_ The presale wallet address.
+     * @param marketingWallet_ The marketing wallet address.
+     * @param developmentWallet_ The development wallet address.
+     * @param communityWallet_ The community wallet address.
+     * @param vestedWallet_ The vested wallet address.
+     */
     constructor(
-        address initialOwner,
-        address _liquidityPoolWallet,
-        address _presaleWallet,
-        address _marketingWallet,
-        address _developmentWallet,
-        address _communityWallet,
-        address _vestedWallet
-    ) ERC20("Eco", "ECO") Ownable(initialOwner) {
-        require(
-            _liquidityPoolWallet != address(0) &&
-                _presaleWallet != address(0) &&
-                _marketingWallet != address(0) &&
-                _developmentWallet != address(0) &&
-                _communityWallet != address(0) &&
-                _vestedWallet != address(0),
-            "Invalid wallet address"
-        );
+        address initialOwner_,
+        address liquidityPoolWallet_,
+        address presaleWallet_,
+        address marketingWallet_,
+        address developmentWallet_,
+        address communityWallet_,
+        address vestedWallet_
+    ) ERC20("Eco", "ECO") Ownable(initialOwner_) {
+        if (
+            liquidityPoolWallet_ == address(0) ||
+            presaleWallet_ == address(0) ||
+            marketingWallet_ == address(0) ||
+            developmentWallet_ == address(0) ||
+            communityWallet_ == address(0) ||
+            vestedWallet_ == address(0)
+        ) {
+            revert InvalidAddress();
+        }
 
-        // Store important wallets
-        liquidityPoolWallet = _liquidityPoolWallet;
-        marketingWallet = _marketingWallet;
-        developmentWallet = _developmentWallet;
+        liquidityPoolWallet = liquidityPoolWallet_;
+        marketingWallet = marketingWallet_;
+        developmentWallet = developmentWallet_;
 
-        // Exclude fee wallets and position manager from fees
-        _isExcludedFromFees[owner()] = true;
-        _isExcludedFromFees[address(this)] = true;
-        _isExcludedFromFees[_liquidityPoolWallet] = true;
-        _isExcludedFromFees[_presaleWallet] = true;
-        _isExcludedFromFees[_marketingWallet] = true;
-        _isExcludedFromFees[_developmentWallet] = true;
-        _isExcludedFromFees[_communityWallet] = true;
-        _isExcludedFromFees[_vestedWallet] = true;
+        isExcludedFromFees[address(this)] = true;
+        isExcludedFromFees[initialOwner_] = true;
+        isExcludedFromFees[liquidityPoolWallet_] = true;
+        isExcludedFromFees[presaleWallet_] = true;
+        isExcludedFromFees[marketingWallet_] = true;
+        isExcludedFromFees[developmentWallet_] = true;
+        isExcludedFromFees[communityWallet_] = true;
+        isExcludedFromFees[vestedWallet_] = true;
 
-        // Token distribution
-        _mint(_liquidityPoolWallet, 500_000_000_000 * 10 ** decimals()); // 50%
-        _mint(_presaleWallet, 250_000_000_000 * 10 ** decimals()); // 25%
-        _mint(_marketingWallet, 150_000_000_000 * 10 ** decimals()); // 15%
-        _mint(_vestedWallet, 50_000_000_000 * 10 ** decimals()); // 5%
-        _mint(_communityWallet, 50_000_000_000 * 10 ** decimals()); // 5%
+        _mint(liquidityPoolWallet_, 500_000_000_000 * 10 ** decimals()); // 50%
+        _mint(presaleWallet_, 250_000_000_000 * 10 ** decimals()); // 25%
+        _mint(marketingWallet_, 150_000_000_000 * 10 ** decimals()); // 15%
+        _mint(vestedWallet_, 50_000_000_000 * 10 ** decimals()); // 5%
+        _mint(communityWallet_, 50_000_000_000 * 10 ** decimals()); // 5%
     }
 
-    function setAutomatedMarketMakerPair(address pair, bool state) public onlyOwner {
-        require(automatedMarketMakerPairs[pair] != state, "Automated Market Maker Pair is already this state");
+    /* ========================== FUNCTIONS ========================== */
+
+    /**
+     * @inheritdoc IEco
+     */
+    function setAutomatedMarketMakerPair(address pair, bool state) external onlyOwner {
+        if (pair == address(0)) {
+            revert InvalidAddress();
+        }
+
+        if (automatedMarketMakerPairs[pair] == state) {
+            revert InvalidAssignment();
+        }
+
         automatedMarketMakerPairs[pair] = state;
+
+        emit SetAutomatedMarketMakerPair(pair, state);
     }
 
+    /**
+     * @inheritdoc IEco
+     */
     function excludeFromFees(address account, bool excluded) external onlyOwner {
-        require(account != address(0), "Invalid address");
-        _isExcludedFromFees[account] = excluded;
+        if (account == address(0)) {
+            revert InvalidAddress();
+        }
+
+        if (isExcludedFromFees[account] == excluded) {
+            revert InvalidAssignment();
+        }
+
+        isExcludedFromFees[account] = excluded;
+
+        emit ExcludeFromFees(account, excluded);
     }
 
+    /**
+     * @inheritdoc ERC20
+     * @dev Overridden to implement tax logic.
+     * @param from The address tokens are transferred from.
+     * @param to The address tokens are transferred to.
+     * @param amount The amount of tokens transferred.
+     */
     function _update(address from, address to, uint256 amount) internal override {
-        // Skip fee logic for minting or burning
+        bool takeFee = true;
+
+        // Skip fee logic for minting or burning.
         if (from == address(0) || to == address(0)) {
-            super._update(from, to, amount);
-            return;
+            takeFee = false;
         }
 
-        // Skip fees for excluded addresses
-        if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
-            super._update(from, to, amount);
-            return;
+        // Skip fees for excluded addresses.
+        if (isExcludedFromFees[from] || isExcludedFromFees[to]) {
+            takeFee = false;
         }
 
-        // Determine buy/sell (only for actual swaps where msg.sender != router)
-        bool isBuy = automatedMarketMakerPairs[from];
-        bool isSell = automatedMarketMakerPairs[to];
+        // Determine buy/sell (only for actual swaps where msg.sender != router).
+        if (takeFee) {
+            bool isBuy = automatedMarketMakerPairs[from];
+            bool isSell = automatedMarketMakerPairs[to];
 
-        // Apply tax
-        if (isBuy || isSell) {  
-            // Split taxes (basis points — 1,000,000 = 100%)
-            uint256 liquidityFee = (amount * LIQUIDITY_TAX) / 1000000;
-            uint256 marketingFee = (amount * MARKETING_TAX) / 1000000;
-            uint256 devFee = (amount * DEVELOPMENT_TAX) / 1000000;
-            uint256 burnFee = (amount * BURN_TAX) / 1000000;
+            if (isBuy || isSell) {
+                // Split taxes (basis points — 1,000,000 = 100%).
+                uint256 liquidityFee = (amount * LIQUIDITY_TAX) / PPM;
+                uint256 marketingFee = (amount * MARKETING_TAX) / PPM;
+                uint256 devFee = (amount * DEVELOPMENT_TAX) / PPM;
+                uint256 burnFee = (amount * BURN_TAX) / PPM;
 
-            uint256 totalFee = liquidityFee + marketingFee + devFee + burnFee;
-            uint256 amountAfterFee = amount - totalFee;
+                // Distribute taxes.
+                if (liquidityFee > 0) super._update(from, liquidityPoolWallet, liquidityFee);
+                if (marketingFee > 0) super._update(from, marketingWallet, marketingFee);
+                if (devFee > 0) super._update(from, developmentWallet, devFee);
+                if (burnFee > 0) _burn(from, burnFee);
 
-            // Distribute taxes
-            if (liquidityFee > 0) super._update(from, liquidityPoolWallet, liquidityFee);
-            if (marketingFee > 0) super._update(from, marketingWallet, marketingFee);
-            if (devFee > 0) super._update(from, developmentWallet, devFee);
-            if (burnFee > 0) _burn(from, burnFee);
+                uint256 totalFee = liquidityFee + marketingFee + devFee + burnFee;
 
-            // Transfer remaining tokens
-            super._update(from, to, amountAfterFee);
-        } else {
-            // Normal wallet-to-wallet transfer, no tax
-            super._update(from, to, amount);
+                amount -= totalFee;
+            }
         }
+
+        super._update(from, to, amount);
     }
 }

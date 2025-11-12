@@ -8,7 +8,6 @@ import { IUniswapV2Pair } from "@uniswap/v2-core/contracts/interfaces/IUniswapV2
 import { IUniswapV2Router02 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 import { IWETH } from "./external/IWETH.sol";
-import { WETH } from "./external/WETH.sol";
 
 import { Eco } from "../contracts/Eco.sol";
 

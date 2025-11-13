@@ -12,8 +12,9 @@ import { IWETH } from "./external/IWETH.sol";
 import { Eco } from "../contracts/Eco.sol";
 
 contract EcoTest is Test {
+    /* ========================== STATE VARIABLES ========================== */
+
     Eco eco;
-    // WETH weth;
     IUniswapV2Factory factory;
     IUniswapV2Router02 router;
     IUniswapV2Pair pair;
@@ -29,6 +30,8 @@ contract EcoTest is Test {
     address devWallet = address(0x4444);
     address communityWallet = address(0x5555);
     address vestedWallet = address(0x6666);
+
+    /* ========================== HELPERS ========================== */
 
     function _addLiquidity(address provider, uint256 ecoAmount, uint256 wethAmount) private {
         vm.startPrank(provider);
@@ -74,8 +77,9 @@ contract EcoTest is Test {
         vm.stopPrank();
     }
 
+    /* ========================== SET UP ========================== */
+
     function setUp() external {
-        // weth = new WETH();
 
         factory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
         router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
@@ -109,17 +113,13 @@ contract EcoTest is Test {
         weth.deposit{value: 1_000_000 ether}();
     }
 
-    // ============================
-    // addLiquidity
-    // ============================
+    /* ========================== TEST FUNCTIONS ========================== */
+
     function testAddLiquidity() public view {
         // LP provider should have provided liquidity as done in setUp()
         assertGt(eco.balanceOf(address(pair)), 0 ether, "Liquidity should be added");
     }
 
-    // ============================
-    // swapExactTokensForTokens
-    // ============================
     function testSwapExactTokensForTokens() public {
         // approve router
         weth.approve(address(router), type(uint256).max);
@@ -162,9 +162,6 @@ contract EcoTest is Test {
         console.log("Buy/Sell tax logic executed successfully");
     }
 
-    // ============================
-    // removeLiquidity
-    // ============================
     function testRemoveLiquidity() public {
         _addLiquidity(lpProvider, 1_000_000 ether, 1_000_000 ether);
 
@@ -192,9 +189,6 @@ contract EcoTest is Test {
         console.log("Remove liquidity executed");
     }
 
-    // ============================
-    // removeLiquidityETHSupportingFeeOnTransferTokens
-    // ============================
     function testRemoveLiquidityETHSupportingFeeOnTransferTokens() public {
         _addLiquidity(lpProvider, 10_000 ether, 10_000 ether);
 
@@ -228,36 +222,6 @@ contract EcoTest is Test {
         console.log("removeLiquidityETHSupportingFeeOnTransferTokens executed");
     }
 
-    // ============================
-    // swapExactTokensForTokens
-    // ============================
-    // function testSwapExactTokensForTokens() public {
-    //     eco.approve(address(router), type(uint256).max);
-    //     weth.approve(address(router), type(uint256).max);
-
-    //     address [] memory path = new address[](2);
-    //     path[0] = address(weth);
-    //     path[1] = address(eco);
-
-    //     uint256 ecoBefore = eco.balanceOf(user);
-
-    //     router.swapExactTokensForTokens(
-    //         2 ether,
-    //         0,
-    //         path,
-    //         user,
-    //         block.timestamp
-    //     );
-
-    //     uint256 ecoAfter = eco.balanceOf(user);
-    //     assertGt(ecoAfter, ecoBefore, "Should receive ECO tokens");
-
-    //     console.log("swapExactTokensForTokens executed successfully");
-    // }
-
-    // ============================
-    // swapExactTokensForTokensSupportingFeeOnTransferTokens
-    // ============================
     function testSwapExactTokensForTokensSupportingFeeOnTransferTokens() public {
         eco.approve(address(router), type(uint256).max);
         weth.approve(address(router), type(uint256).max);
@@ -305,9 +269,6 @@ contract EcoTest is Test {
         assertGt(wethAfter, wethBefore, "User should gain WETH from selling ECO");
     }
 
-    // ============================
-    // swapTokensForExactTokens
-    // ============================
     function testSwapTokensForExactTokens() public {
         eco.approve(address(router), type(uint256).max);
         weth.approve(address(router), type(uint256).max);
@@ -352,9 +313,6 @@ contract EcoTest is Test {
         console.log("Sell phase executed successfully");
     }
 
-    // ============================
-    // swapTokensForExactTokensSupportingFeeOnTransferTokens
-    // ============================
     function testSwapTokensForExactTokensSupportingFeeOnTransferTokens() public {
         eco.approve(address(router), type(uint256).max);
         weth.approve(address(router), type(uint256).max);

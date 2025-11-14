@@ -1,0 +1,20 @@
+[profile.default]
+src = "contracts"
+test = "tests"
+out = "out"
+libs = ["lib", "node_modules"]
+auto_detect_remappings = true
+cache_path = "cache_forge"
+solc = "0.8.30"
+optimizer = true
+optimizer_runs = 1000000
+evm_version = "cancun"
+
+[profile.forking]
+eth_rpc_url = "forking"
+
+[rpc_endpoints]
+forking = "${URL_PRODUCTION}"
+
+[lint]
+lint_on_build = false

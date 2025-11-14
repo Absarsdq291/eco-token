@@ -1,6 +1,6 @@
 {
     "name": "eco-token",
-    "version": "0.0.1",
+    "version": "1.0.0-alpha.0",
     "description": "Community-driven meme coin designed to blend fun, virality, and financial utility",
     "scripts": {
         "build": "forge build",

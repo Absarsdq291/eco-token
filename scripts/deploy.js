@@ -16,13 +16,15 @@ const deploy = async () => {
     const contractName = "Eco";
 
     // Deployment variables.
-    let constructorArguments = [process.env.INITIAL_OWNER,
+    let constructorArguments = [
+        process.env.INITIAL_OWNER,
         process.env.LIQUIDITY_POOL_WALLET,
         process.env.PRESALE_WALLET,
         process.env.MARKETING_WALLET,
         process.env.DEVELOPMENT_WALLET,
         process.env.COMMUNITY_WALLET,
-        process.env.VESTED_WALLET];
+        process.env.VESTED_WALLET
+    ];
     let constructorValue = 0;
 
     // Structuring deployment variables.

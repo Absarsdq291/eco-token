@@ -12,7 +12,7 @@
         "deploy-local": "hardhat run scripts/deploy.js --network hardhat",
         "deploy-production": "hardhat run scripts/deploy.js",
         "deploy-staging": "hardhat run scripts/deploy.js --network staging",
-        "format": "prettier --check --write .prettierrc *.json *.js {contracts,tests}/**/*.sol {scripts}/**/*.js graphs/**/*.{json,ts}",
+        "format": "prettier --check --write .prettierrc *.json *.js {contracts,tests}/**/*.sol scripts/**/*.js",
         "format-lint": "npm run format && npm run lint",
         "lint": "solhint --max-warnings 0 {contracts,tests}/**/*.sol",
         "test": "cross-env FOUNDRY_PROFILE=forking forge test",
